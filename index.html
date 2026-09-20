@@ -267,12 +267,23 @@
 
     .records-title { margin: 0 0 14px; color: #704a72; font-size: 1.05rem; text-align: center; }
     .table-scroll { overflow-x: auto; }
-    table { width: 100%; min-width: 380px; border-collapse: collapse; font-size: .9rem; text-align: left; }
+    table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: .9rem; text-align: left; }
     th, td { padding: 11px 10px; border-bottom: 1px solid rgba(203,146,177,.18); }
     th { color: #92617f; font-size: .78rem; letter-spacing: .08em; }
     td { color: #765e75; }
     tbody tr:last-child td { border-bottom: 0; }
     .empty { padding: 20px 10px; color: #aa90a7; text-align: center; }
+    .delete-button {
+      padding: 7px 12px;
+      border: 1px solid rgba(201, 77, 120, .28);
+      border-radius: 999px;
+      color: var(--rose-dark);
+      background: rgba(255, 241, 246, .8);
+      cursor: pointer;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+    .delete-button:hover { background: #fff1f6; }
 
     @keyframes reveal { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes drift { to { transform: translate(35px, 25px) scale(1.08); } }
@@ -366,7 +377,7 @@
       <h2 class="records-title">📊 完美約會計畫紀錄表</h2>
       <div class="table-scroll">
         <table>
-          <thead><tr><th>次數</th><th>預定日期</th><th>行程安排</th></tr></thead>
+          <thead><tr><th>次數</th><th>預定日期</th><th>行程安排</th><th>No 移動次數</th><th>管理</th></tr></thead>
           <tbody id="recordBody"></tbody>
         </table>
       </div>
@@ -387,6 +398,7 @@
       let yesScale = 1;
       let selectedDate = "";
       let selectedPlans = [];
+      let noMoves = 0;
 
       const today = new Date();
       const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -401,8 +413,8 @@
       function renderRecords() {
         const records = getRecords();
         recordBody.innerHTML = records.length
-          ? records.map((record, index) => `<tr><td>${index + 1}</td><td>${record.date}</td><td>${record.plans.join("、")}</td></tr>`).join("")
-          : '<tr><td class="empty" colspan="3">還沒有紀錄，等你來寫下第一個約會計畫 ♡</td></tr>';
+          ? records.map((record, index) => `<tr><td>${index + 1}</td><td>${record.date}</td><td>${record.plans.join("、")}</td><td>${record.noMoves || 0} 次</td><td><button class="delete-button" type="button" data-record-index="${index}">刪除</button></td></tr>`).join("")
+          : '<tr><td class="empty" colspan="5">還沒有紀錄，等你來寫下第一個約會計畫 ♡</td></tr>';
       }
 
       function showStep(step) {
@@ -412,6 +424,7 @@
       }
 
       function moveNoButton() {
+        noMoves += 1;
         yesScale = Math.min(1.7, yesScale + .12);
         yesButton.style.transform = `scale(${yesScale})`;
         const maxX = Math.max(38, Math.min(92, escapeZone.clientWidth / 4));
@@ -434,7 +447,7 @@
           return;
         }
         const records = getRecords();
-        records.push({ date: selectedDate, plans: [...selectedPlans] });
+        records.push({ date: selectedDate, plans: [...selectedPlans], noMoves });
         localStorage.setItem("perfectDatePlans", JSON.stringify(records));
         renderRecords();
         document.getElementById("letterContent").innerHTML =
@@ -462,8 +475,22 @@
         event.currentTarget.classList.toggle("selected", selectAll);
       });
       document.getElementById("submitButton").addEventListener("click", savePlan);
+      recordBody.addEventListener("click", event => {
+        const deleteButton = event.target.closest(".delete-button");
+        if (!deleteButton) return;
+        const password = prompt("請輸入刪除密碼：");
+        if (password !== "5200") {
+          alert("密碼錯誤，紀錄未刪除。");
+          return;
+        }
+        const records = getRecords();
+        records.splice(Number(deleteButton.dataset.recordIndex), 1);
+        localStorage.setItem("perfectDatePlans", JSON.stringify(records));
+        renderRecords();
+      });
       document.getElementById("resetButton").addEventListener("click", () => {
         yesScale = 1;
+        noMoves = 0;
         selectedPlans = [];
         noButton.style.transform = "translate(0, 0)";
         yesButton.style.transform = "scale(1)";
