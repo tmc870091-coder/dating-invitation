@@ -284,6 +284,18 @@
       font-weight: 700;
     }
     .delete-button:hover { background: #fff1f6; }
+    .secret-button {
+      padding: 7px 12px;
+      border: 1px solid rgba(167, 141, 221, .35);
+      border-radius: 999px;
+      color: #765e9a;
+      background: rgba(245, 240, 255, .86);
+      cursor: pointer;
+      font-size: .8rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .secret-button:hover { background: #eee7ff; }
 
     @keyframes reveal { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes drift { to { transform: translate(35px, 25px) scale(1.08); } }
@@ -377,7 +389,7 @@
       <h2 class="records-title">📊 完美約會計畫紀錄表</h2>
       <div class="table-scroll">
         <table>
-          <thead><tr><th>次數</th><th>預定日期</th><th>行程安排</th><th>No 移動次數</th><th>管理</th></tr></thead>
+          <thead><tr><th>次數</th><th>預定日期</th><th>行程安排</th><th>悄悄話</th><th>管理</th></tr></thead>
           <tbody id="recordBody"></tbody>
         </table>
       </div>
@@ -413,7 +425,7 @@
       function renderRecords() {
         const records = getRecords();
         recordBody.innerHTML = records.length
-          ? records.map((record, index) => `<tr><td>${index + 1}</td><td>${record.date}</td><td>${record.plans.join("、")}</td><td>${record.noMoves || 0} 次</td><td><button class="delete-button" type="button" data-record-index="${index}">刪除</button></td></tr>`).join("")
+          ? records.map((record, index) => `<tr><td>${index + 1}</td><td>${record.date}</td><td>${record.plans.join("、")}</td><td><button class="secret-button" type="button" data-record-index="${index}">🔒 點擊查看</button></td><td><button class="delete-button" type="button" data-record-index="${index}">刪除</button></td></tr>`).join("")
           : '<tr><td class="empty" colspan="5">還沒有紀錄，等你來寫下第一個約會計畫 ♡</td></tr>';
       }
 
@@ -476,6 +488,16 @@
       });
       document.getElementById("submitButton").addEventListener("click", savePlan);
       recordBody.addEventListener("click", event => {
+        const secretButton = event.target.closest(".secret-button");
+        if (secretButton) {
+          const password = prompt("請輸入悄悄話密碼：");
+          if (password === "5200") {
+            const record = getRecords()[Number(secretButton.dataset.recordIndex)];
+            secretButton.textContent = `${record.noMoves || 0} 次`;
+            secretButton.disabled = true;
+          }
+          return;
+        }
         const deleteButton = event.target.closest(".delete-button");
         if (!deleteButton) return;
         const password = prompt("請輸入刪除密碼：");
