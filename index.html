@@ -284,8 +284,12 @@
       font-weight: 700;
     }
     .delete-button:hover { background: #fff1f6; }
+    .record-panel {
+      display: none;
+      margin-top: 18px;
+    }
+    .record-panel.visible { display: block; }
     .counter-card {
-      margin-top: 22px;
       padding: 18px 21px;
       border: 1px solid rgba(255,255,255,.75);
       border-radius: 24px;
@@ -296,8 +300,7 @@
     .counter-title { margin: 0 0 7px; color: #704a72; font-size: 1rem; }
     .counter-value { margin: 0; color: var(--rose-dark); font-size: 1.55rem; font-weight: 800; }
     .record-actions { display: flex; justify-content: center; gap: 10px; margin-bottom: 14px; }
-    .record-table { display: none; }
-    .record-table.visible { display: block; }
+    .record-table { display: block; }
 
     @keyframes reveal { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes drift { to { transform: translate(35px, 25px) scale(1.08); } }
@@ -387,24 +390,27 @@
       </div>
     </section>
 
-    <section class="counter-card" aria-live="polite">
-      <h2 class="counter-title">💭 No 移動計數</h2>
-      <p class="counter-value"><span id="noMoveCount">0</span> 次</p>
-      <button class="btn btn-secondary" id="resetCounterButton" type="button">重新計數</button>
-    </section>
-
     <section class="records">
-      <h2 class="records-title">📊 完美約會計畫紀錄表</h2>
       <div class="record-actions">
-        <button class="btn btn-primary" id="loginRecordsButton" type="button">🔐 登入查看紀錄</button>
-        <button class="btn btn-secondary" id="logoutRecordsButton" type="button" hidden>隱藏紀錄</button>
+        <button class="btn btn-primary" id="loginRecordsButton" type="button">(登入查看)</button>
       </div>
-      <div class="record-table" id="recordTable">
-        <div class="table-scroll">
-          <table>
-            <thead><tr><th>次數</th><th>預定日期</th><th>行程安排</th><th>管理</th></tr></thead>
-            <tbody id="recordBody"></tbody>
-          </table>
+      <div class="record-panel" id="recordPanel">
+        <div class="record-actions">
+          <button class="btn btn-secondary" id="logoutRecordsButton" type="button">隱藏紀錄</button>
+        </div>
+        <div class="counter-card" aria-live="polite">
+          <h2 class="counter-title">💭 No 移動計數</h2>
+          <p class="counter-value"><span id="noMoveCount">0</span> 次</p>
+          <button class="btn btn-secondary" id="resetCounterButton" type="button">重新計數</button>
+        </div>
+        <h2 class="records-title">📊 完美約會計畫紀錄表</h2>
+        <div class="record-table" id="recordTable">
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>次數</th><th>預定日期</th><th>行程安排</th><th>管理</th></tr></thead>
+              <tbody id="recordBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -421,7 +427,7 @@
       const dateInput = document.getElementById("dateInput");
       const recordBody = document.getElementById("recordBody");
       const noMoveCount = document.getElementById("noMoveCount");
-      const recordTable = document.getElementById("recordTable");
+      const recordPanel = document.getElementById("recordPanel");
       const loginRecordsButton = document.getElementById("loginRecordsButton");
       const logoutRecordsButton = document.getElementById("logoutRecordsButton");
       let currentStep = 1;
@@ -515,7 +521,7 @@
         const deleteButton = event.target.closest(".delete-button");
         if (!deleteButton) return;
         const password = prompt("請輸入刪除密碼：");
-        if (password !== "5200") {
+        if (password !== "102938") {
           alert("密碼錯誤，紀錄未刪除。");
           return;
         }
@@ -525,18 +531,18 @@
         renderRecords();
       });
       loginRecordsButton.addEventListener("click", () => {
-        if (prompt("請輸入紀錄密碼：") !== "5200") return;
-        recordTable.classList.add("visible");
+        if (prompt("請輸入紀錄密碼：") !== "102938") return;
+        recordPanel.classList.add("visible");
         loginRecordsButton.hidden = true;
         logoutRecordsButton.hidden = false;
       });
       logoutRecordsButton.addEventListener("click", () => {
-        recordTable.classList.remove("visible");
+        recordPanel.classList.remove("visible");
         loginRecordsButton.hidden = false;
         logoutRecordsButton.hidden = true;
       });
       document.getElementById("resetCounterButton").addEventListener("click", () => {
-        if (prompt("請輸入重新計數密碼：") !== "5200") return;
+        if (prompt("請輸入重新計數密碼：") !== "102938") return;
         noMoves = 0;
         localStorage.setItem("noMoveCount", "0");
         renderNoMoveCount();
